@@ -24,6 +24,12 @@
       retries: 2
       tags: stage
 
+    - name: copy stage.env to remote folder
+      copy:
+        src: stage.env
+        dest: "{{ workdir }}/stage.env"
+      tags: stage
+
     - name: ensure mongo data container (stage)
       docker_container:
         image: mongo:3.4
@@ -53,18 +59,16 @@
 
     - name: run api container (stage)
       docker_container:
+        env_file: "{{ workdir }}/stage.env"
         image: big-time-api:stage
         name: big-time-api-stage
-        ports: '4040:4040'
         state: started
         env:
-          NODE_ENV: production
-          LETSENCRYPT_HOST: 'bigtime.aliencyb.org'
+          NODE_ENV: 'production'
+          LETSENCRYPT_HOST: 'api.bigtime.aliencyb.org'
           MONGO_HOST: 'mongodb://mongo/big-time'
-          MONGO_PORT: 27017
-          PORT: 4040
-          VIRTUAL_HOST: 'bigtime.aliencyb.org'
-          VIRTUAL_PORT: 4040
+          MONGO_PORT: '27017'
+          VIRTUAL_HOST: 'api.bigtime.aliencyb.org'
         links:
           - 'big-time-stage-db:mongo'
       tags: stage
