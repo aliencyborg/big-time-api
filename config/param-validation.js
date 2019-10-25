@@ -20,6 +20,14 @@ module.exports = {
     }
   },
 
+  // POST /api/scores
+  createScore: {
+    body: {
+      username: Joi.string().required(),
+      value: Joi.number().required()
+    }
+  },
+
   // POST /api/auth/login
   login: {
     body: {
