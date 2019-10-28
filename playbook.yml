@@ -62,13 +62,16 @@
         env_file: "{{ workdir }}/stage.env"
         image: big-time-api:stage
         name: big-time-api-stage
+        restart: yes
         state: started
         env:
           NODE_ENV: 'production'
           LETSENCRYPT_HOST: 'api.bigtime.aliencyb.org'
           MONGO_HOST: 'mongodb://mongo/big-time'
           MONGO_PORT: '27017'
+          PORT: '4040'
           VIRTUAL_HOST: 'api.bigtime.aliencyb.org'
+          VIRTUAL_PORT: '4040'
         links:
           - 'big-time-stage-db:mongo'
       tags: stage
