@@ -41,6 +41,7 @@
       docker_container:
         image: mongo:3.4
         name: big-time-stage-db
+        restart_policy: always
         state: started
         volumes_from:
           - big-time-stage-db-data
@@ -63,6 +64,7 @@
         image: big-time-api:stage
         name: big-time-api-stage
         restart: yes
+        restart_policy: always
         state: started
         env:
           NODE_ENV: 'production'
