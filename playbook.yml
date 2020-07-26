@@ -79,3 +79,68 @@
       tags: stage
 
     ## PRODUCTION ##
+
+    - name: clone or update big-time-api repository (prod)
+      git:
+        accept_hostkey: yes
+        dest: "{{ workdir }}"
+        key_file: /home/hank/.ssh/id_rsa
+        repo: 'git@github.com:aliencyborg/big-time-api.git'
+        update: yes
+        version: prod
+      retries: 2
+      tags: prod
+
+    - name: copy prod.env to remote folder
+      copy:
+        src: prod.env
+        dest: "{{ workdir }}/prod.env"
+      tags: prod
+
+    - name: ensure mongo data container (prod)
+      docker_container:
+        image: mongo:3.4
+        name: big-time-db-data
+        state: stopped
+      tags: prod
+
+    - name: run mongo db container (prod)
+      docker_container:
+        image: mongo:3.4
+        name: big-time-db
+        restart_policy: always
+        state: started
+        volumes_from:
+          - big-time-db-data
+      tags: prod
+
+    - name: build docker image (prod)
+      docker_image:
+        force_source: yes
+        name: big-time-api
+        source: build
+        tag: prod
+        build:
+          path: "{{ workdir }}"
+          pull: no
+      tags: prod
+
+    - name: run api container (prod)
+      docker_container:
+        env_file: "{{ workdir }}/prod.env"
+        image: big-time-api:prod
+        name: big-time-api
+        restart: yes
+        restart_policy: always
+        state: started
+        env:
+          NODE_ENV: 'production'
+          LETSENCRYPT_HOST: 'api.bigtime.shangri-lashow.com'
+          MONGO_HOST: 'mongodb://mongo/big-time'
+          MONGO_PORT: '27017'
+          PORT: '4040'
+          VIRTUAL_HOST: 'api.bigtime.shangri-lashow.com'
+          VIRTUAL_PORT: '4040'
+        links:
+          - 'big-time-db:mongo'
+      tags: prod
